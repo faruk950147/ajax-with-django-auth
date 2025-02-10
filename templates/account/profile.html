@@ -1,0 +1,319 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %} Profile {% endblock title %} 
+{% block main %}
+  <section style="background-color: #eee;">
+    <div class="container py-5">
+      <div class="editBox" style="display: none;">
+        <div class="d-flex flex-column text-center" style="max-width: 600px; margin: 0 auto;">
+          <div class="form-title text-center" style="margin: 50px;">
+            <h4 class="title0">Profile</h4>
+          </div>
+          <form id="form" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class"form-group" style="margin-top: 15px;">
+              <input type="text" name="username" placeholder="Username" id="id_username" class="form-control" value="{{request.user.username}}" required/>
+            </div>
+            <div class="username-error form-group" style="display: none">
+      
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="email" name="email" placeholder="Email" id="id_email" class="form-control" value="{{request.user.email}}" required/>
+            </div>
+            <div class="email-error form-group" style="display: none">
+      
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="text" name="country" placeholder="Country" id="id_country" class="form-control" value="{{request.user.profiles.country}}" required/>
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="text" name="city" placeholder="City" id="id_city" class="form-control" value="{{request.user.profiles.city}}" required/>
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="text" name="home_city" placeholder="Home City" id="id_home_city" class="form-control" value="{{request.user.profiles.home_city}}" required/>
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="text" name="zip_code" placeholder="Zip Codes" id="id_zip_code" class="form-control" value="{{request.user.profiles.zip_code}}" required/>
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="text" name="phone" placeholder="Phone" id="id_phone" class="form-control" value="{{request.user.profiles.phone}}" required/>
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="text" name="address" placeholder="Address" id="id_address" class="form-control" value="{{request.user.profiles.address}}" required/>
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="file" name="profile_image" placeholder="Profile Image" id="id_profile_image" class="form-control" value="{{request.user.profiles.profile_image}}" required />
+            </div>
+      
+            <div class="form-group" style="margin-top: 15px;">
+              <button  type="button" class="btn btn-info btn-lg form-control" id="editBtn">Changes Saved</button>
+            </div>                      
+          </form>
+        </div>
+      </div>
+      <div class="profileBox" style="margin-top: 20px;">
+        <div class="row">
+          <div class="col-lg-4">
+            <div class="card mb-4">
+              <div class="card-body text-center">
+                <div class="img-fluid">
+                  {% if request.user.profiles.profile_image %}
+                  <img src="{{request.user.profiles.profile_image.url}}" alt="{{request.user.username}}"
+                  class="rounded-circle img-fluid shadow-lg" style="width: 150px;">
+                  {% else %}
+                  <img src="{% static "assets/images/user.png" %}" alt="{{request.user.username}}"
+                  class="rounded-circle img-fluid shadow-lg" style="width: 150px;">
+                  {% endif %}  
+                </div>
+                <h5 class="my-3">{{request.user.username}}</h5>
+                <p class="text-muted mb-1"> {{request.user.email}} </p>
+                <p class="text-muted mb-1">
+                  Account Types : 
+                  {% if request.user.is_active and request.user.is_staff and request.user.is_superuser %}
+                  Admin
+                  {% elif request.user.is_active and request.user.is_staff %}
+                  Staff
+                  {% else %}
+                  Customer
+                  {% endif %}
+                </p>
+                <p class="text-muted mb-4">{{request.user.profiles.address}}</p>
+                <div class="d-flex justify-content-center mb-2">
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-8">
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-sm-12">
+                    {% include "components/alert.html" %}
+                  </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-10">
+                        <h5 class="text-muted text-start">My Profile</h5>
+                    </div>
+                    <div class="col-sm-2">
+                      <button type="button" class="btn btn-primary btn-round" data-toggle="tooltip" data-placement="top" title="Edit Profile" id="toggleBtn">
+                        <i class="fas fa-pen-nib"></i>
+                      </button>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Full Name</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{request.user.username|capfirst}}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Country</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{request.user.profiles.country|capfirst}}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">City</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{request.user.profiles.city|capfirst}}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Home City</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{request.user.profiles.home_city|capfirst}}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Zip Codes</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{request.user.profiles.zip_code|capfirst}}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Phone</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{request.user.profiles.phone|capfirst}}</p>
+                  </div>
+                </div>
+                <hr>
+                <div class="row">
+                  <div class="col-sm-3">
+                    <p class="mb-0">Address</p>
+                  </div>
+                  <div class="col-sm-9">
+                    <p class="text-muted mb-0">{{request.user.profiles.address|capfirst}}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock main %}
+{% block extra_scripts %}
+    <script>
+      $(document).ready(function(){
+        $("#toggleBtn").on("click", function(e){
+          e.preventDefault()
+          $(".editBox").stop().fadeToggle(1000)
+        });
+
+        $("#editBtn").on("click", function(e){
+          e.preventDefault()
+          let username = $("#form #id_username").val()
+          let email = $("#form #id_email").val()
+          let country = $("#form #id_country").val()
+          let city = $("#form #id_city").val()
+          let home_city = $("#form #id_home_city").val()
+          let zip_code = $("#form #id_zip_code").val()
+          let phone = $("#form #id_phone").val()
+          let address = $("#form #id_address").val()
+          let csrfmiddlewaretoken = $('#form input[name=csrfmiddlewaretoken]').val();
+          let data = new FormData()
+          data.append("username", username)
+          data.append("email", email)
+          data.append("country", country)
+          data.append("city", city)
+          data.append("home_city", home_city)
+          data.append("zip_code", zip_code)
+          data.append("phone", phone)
+          data.append("address", address)
+          data.append("profile_image", $("input[id^='id_profile_image']")[0].files[0])
+          data.append("csrfmiddlewaretoken", csrfmiddlewaretoken)
+          if(username.length > 0 && email.length > 0 && country.length > 0 && city.length > 0 && home_city.length > 0 && zip_code.length > 0 && phone.length > 0 && address.length > 0){
+            $.ajax({
+              url:"{% url 'profile' %}",
+              method:"POST",
+              processData:false,
+              contentType:false,
+              mimeType:"multipart/form-data",
+              data:data,
+              dataType:"json",
+              success:function(res){
+                if(res.status == 200){
+                  $(".editBox").hide(1000)
+                  $('.profileBox').load(window.location.href + ' .profileBox');
+                }
+              }
+            });
+          }
+          else{
+            if(username == ""){
+              alert('Please fill up your username')
+            }
+            if(email == ""){
+              alert('Please fill up your email')
+            }
+            if(country == ""){
+              alert('Please fill up your country')
+            }
+            if(city == ""){
+              alert('Please fill up your city')
+            }
+            if(home_city == ""){
+              alert('Please fill up your home city')
+            }
+            if(zip_code == ""){
+              alert('Please fill up your zip code')
+            }
+            if(phone == ""){
+              alert('Please fill up your phone')
+            }
+            if(address == ""){
+              alert('Please fill up your address')
+            }
+          }
+        });
+
+        $( "#id_username" ).on( "keyup", function(e){
+          e.preventDefault();
+          const username = e.currentTarget.value;
+          if(username.length > 0){
+            $.ajax({
+              url:"{% url 'usernamevalidation' %}",
+              method:"POST",
+              data: JSON.stringify({username:username}),
+              dataType:"json",
+              success:function(res){	
+                if(res.username_error){
+                  $("#id_username").addClass("is-invalid");
+                  $(".username-error").html(res.username_error);
+                  $(".username-error").css("display", "block");
+                  $("#editBtn").attr('disabled', true);
+                }
+                else{
+                  if(res.username_valid){
+                    $("#id_username").removeClass("is-invalid");
+                    $("#id_username").addClass("is-valid");
+                    $(".username-error").css("display", "none");
+                    $("#editBtn").attr('disabled', false);
+                  }
+                } 
+              },
+            });
+          }
+        });
+
+        $( "#id_email" ).on( "keyup", function(e){
+          e.preventDefault();
+          const email = e.currentTarget.value;
+          if(email.length > 0){
+            $.ajax({
+              url:"{% url 'emailvalidation' %}",
+              method:"POST",
+              data: JSON.stringify({email:email}),
+              dataType:"json",  
+              success:function(res){
+                if(res.email_error){
+                  $("#id_email").addClass("is-invalid")
+                  $(".email-error").html(res.email_error)
+                  $(".email-error").css("display", "block");
+                  $("#editBtn").attr('disabled', true);
+                }
+                else{
+                  if(res.email_valid){
+                    $("#id_email").removeClass("is-invalid")
+                    $("#id_email").addClass("is-valid")
+                    $(".email-error").css("display", "none");   
+                    $("#editBtn").attr('disabled', false);             
+                  }
+                }
+              }       
+            });
+          }
+        });
+
+      });
+    </script>
+{% endblock extra_scripts %}

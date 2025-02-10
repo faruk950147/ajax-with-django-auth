@@ -1,0 +1,53 @@
+{% extends 'base.html' %} 
+{% load static %} 
+{% block title %}Home{% endblock title %} 
+{% block main %}
+<div id="hero">
+    <div class="container">
+        <div class="row my-5">
+            <div class="col-lg-3">
+                <h4 class="text-center">Student Add</h4>
+                <hr>
+                <div class="student">
+                    <form action="#" method="POST" id="">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" id="id">
+                        {{form.as_p}}
+                        <input type="submit" value="Saved Changes" class="form-control btn btn-success my-3" id="SavedChanges">
+                    </form>
+                </div>
+            </div>
+            
+            <div class="col-lg-1 lineHeight"></div>
+
+            <div class="col-lg-8">
+                <h4 class="text-center">Student Tables</h4>
+                <hr>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ID</th>
+                            <th scope="col">NAME</th>
+                            <th scope="col">DEPARTMENT</th>
+                            <th scope="col">PHONE</th>
+                            <th scope="col">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        <tr>
+                            <td scope="row"> 1 </td>
+                            <td scope="row"> Sifa </td>
+                            <td scope="row"> Cse </td>
+                            <td scope="row"> 01581759301 </td>
+                            <td scope="row">
+                                <input type="button" data-id="  " value="Edit" class="btn btn-warning btn-sm btn-edit">
+                                <input type="button" data-id="  " value="Del" class="btn btn-danger btn-sm btn-del">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock main %}

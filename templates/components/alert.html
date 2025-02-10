@@ -1,0 +1,8 @@
+{% load static %}
+{% if messages %}
+    {% for message in messages %}
+    <div class="text-justify text-center alert alert-sm alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+      <strong>{{message}}</strong>
+    </div>
+    {% endfor %}
+{% endif %}

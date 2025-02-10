@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+  	<title>{% block title %}  {% endblock title %} | Buy Coding </title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
+	{% include "components/css.html" %}
+  </head>
+  <body>
+		
+		<div class="wrapper d-flex align-items-stretch">
+      <!-- Sidebar   -->
+		  {% include "components/sidebar.html" %}
+      <!-- Sidebar   -->
+        <!-- Page Content  -->
+      <div id="content" class="p-4 p-md-5">
+        <!-- Topbar Area -->
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+          <div class="container-fluid">
+            <!-- Topbar Toggle Button -->
+            {% include "components/toggle.html" %}
+            <!-- End Topbar Toggle Button -->
+            <!-- Topbar Menu Area -->
+            {% include "components/topbar.html" %}
+            <!-- End Topbar Menu Area -->
+          </div>
+        </nav>
+        <!-- Topbar Area -->
+        <!-- main Area -->
+        {% block main %}
+    
+        {% endblock main %}
+        <!-- main Area -->
+      </div>
+	</div>
+
+    {% include "components/script.html" %}
+    {% block extra_scripts %}
+    
+    {% endblock extra_scripts %}
+  </body>
+</html>

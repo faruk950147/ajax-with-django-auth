@@ -1,0 +1,29 @@
+{% load static %}
+<!-- Topbar Menu Area -->
+<div class="topbar-navbar">
+  <div class="dropdown dropstart">
+    <a href="" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+      {% if request.user.is_authenticated and request.user.profiles.profile_image %}
+      <img src=" {{request.user.profiles.profile_image.url}} " alt="{{request.user.username}}" width="32" height="32" class="rounded-circle shadow"><span class="title ml-2">{{request.user.username}}</span>
+      {% elif request.user.is_authenticated  %}
+      <img src="{% static "assets/images/user.png" %}" alt="{{request.user.username}}" width="32" height="32" class="rounded-circle shadow"><span class="title ml-2">{{request.user.username}}</span>
+      {% else %}
+      <img src="{% static "assets/images/user.png" %}" alt="avater" width="32" height="32" class="rounded-circle shadow">
+      {% endif %}
+    </a>
+    <ul class="dropdown-menu dropdown-menu-end animate slideIn" style="margin-top: 50px;">
+      {% if request.user.is_authenticated %}
+      <li><a class="dropdown-item" href="{% url "profile" %}">Profile</a></li>
+      <li><a class="dropdown-item" href="{% url "changepassword" %}">Changes Password</a></li>
+      <li><a class="dropdown-item" href="">Activity {{request.user.is_active}}</a></li>
+      <li><hr class="dropdown-divider"></li>
+      <li><a class="dropdown-item" href="{% url "signout" %}">Sign Out</a></li>
+      {% else %}
+      <li><a class="dropdown-item" href="{% url "signup" %}">Sign Up</a></li>
+      <li><a class="dropdown-item" href="{% url "sign" %}">Sign In</a></li>
+      <li><a class="dropdown-item" href="">Activity {{request.user.is_active}}</a></li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+<!-- End Topbar Menu Area -->
