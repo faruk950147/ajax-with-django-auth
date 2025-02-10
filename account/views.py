@@ -33,8 +33,10 @@ class UsernameValidationView(generic.View):
         data = json.loads(request.body)
         username = data.get('username')
         if not str(username).isalnum():
+            messages.error(request, 'Username should only contain alphanumeric characters')
             return JsonResponse({'username_error': 'Username should only contain alphanumeric characters'})
         if User.objects.filter(username=username).exists():
+            messages.error(request, 'Sorry username in used,choose another one')
             return JsonResponse({'username_error': 'Sorry username in used,choose another one'})
         return JsonResponse({'username_valid': True})
 
@@ -44,8 +46,10 @@ class EmailValidationView(generic.View):
         data = json.loads(request.body)
         email = data.get('email')
         if not validate_email(email):
+            messages.error(request, 'Email is invalid')
             return JsonResponse({'email_error': 'Email is invalid'})
         if User.objects.filter(email=email).exists():
+            messages.error(request, 'Sorry email in used,choose another one ')
             return JsonResponse({'email_error': 'Sorry email in used,choose another one '})
         return JsonResponse({'email_valid': True})
         
@@ -57,8 +61,10 @@ class PasswordValidationView(generic.View):
         password2 = data.get('password2')
         
         if password != password2:
+            messages.error(request, 'Your password do not matches !')
             return JsonResponse({'password_error': 'Your password do not matches !'})
         if len(password) and len(password2) < 8:
+            messages.info(request, 'Your password too shorts !')
             return JsonResponse({'password_info': 'Your password too shorts !'})
         return JsonResponse({'password_valid': True})
 
@@ -68,6 +74,7 @@ class LoginUsernameValidationView(generic.View):
         data = json.loads(request.body)
         username = data.get('username')
         if not User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).exists():
+            messages.error(request, 'Sorry there is no account with this username or this email, choose another one !')
             return JsonResponse({'username_error': 'Sorry there is no account with this username or this email, choose another one !'})
         return JsonResponse({'username_valid': True})
     
@@ -120,16 +127,17 @@ class ActivationView(generic.View):
             id = force_str(urlsafe_base64_decode(uidb64))
             user = User.objects.get(id=id)
             if not account_activation_token.check_token(user, token):
-                messages.success(request, 'Account already activated successfully')
+                messages.error(request, 'Invalid token provided')
                 return redirect('sign')
             if user.is_active:
+                messages.error(request, 'Account already activated')
                 return redirect('sign')
             user.is_active = True
             user.save()
             messages.success(request, 'Account activated successfully')
             return redirect('sign')
         except Exception as e:
-            pass
+            messages.error(request, 'Something went wrong')
         return redirect('sign')   
 
 @method_decorator(never_cache, name='dispatch')
@@ -145,13 +153,17 @@ class SignInView(LogoutRequiredMixin, generic.View):
             if user:
                 if user.is_superuser:
                     login(request, user)
+                    messages.success(request, 'You are logged in successfully !')
                     return JsonResponse({'status': 200})                    
                 if user.is_active:
                     login(request, user)
+                    messages.success(request, 'You are logged in successfully !')
                     return JsonResponse({'status': 201})
                 else:
+                    messages.error(request, 'Your account is not active')
                     return JsonResponse({'status': 202})
             else:
+                messages.error(request, 'Invalid username or password')
                 return JsonResponse({'status': 400})
         return render(request, 'account/login.html')
     
@@ -161,6 +173,16 @@ class SignOutView(LoginRequiredMixin, generic.View):
     def get(self, request):
         logout(request)
         return redirect('sign')
+    
+    # def post(self, request):
+    #     if request.method == "POST" or request.method == "post" and request.is_ajax():
+    #         logout(request)
+    #         messages.success(request, 'You are logged out successfully !')
+    #         return JsonResponse({'status': 200})
+    #     else:
+    #         messages.error(request, 'Something went wrong')
+    #         return JsonResponse({'status': 400})    
+    #         html nav <button id="logout-btn">Logout</button> ajax call
     
 @method_decorator(never_cache, name='dispatch')    
 class ChangePasswordView(LoginRequiredMixin, generic.View):
@@ -179,6 +201,7 @@ class ChangePasswordView(LoginRequiredMixin, generic.View):
                 messages.success(request, 'Your password changes successfully !')
                 return JsonResponse({'status': 200})
             else:
+                messages.error(request, 'Your current password is wrong !')
                 return JsonResponse({'status': 400})
         return render(request, 'account/changes-password.html')
     
@@ -201,8 +224,10 @@ class ResetPasswordView(LogoutRequiredMixin, generic.View):
                         [email]
                     )
                     EmailThread(email).start()
+                    messages.success(request, 'We have sent you an email with otp to reset your password')
                     return JsonResponse({"status": 200, 'otp': otp, 'email': user.email})
             except Exception as e:
+                messages.error(request, 'Something went wrong')
                 return JsonResponse({"status": 400})
     
 @method_decorator(never_cache, name='dispatch')    
