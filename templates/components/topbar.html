@@ -6,9 +6,9 @@
       {% if request.user.is_authenticated and request.user.profiles.profile_image %}
       <img src=" {{request.user.profiles.profile_image.url}} " alt="{{request.user.username}}" width="32" height="32" class="rounded-circle shadow"><span class="title ml-2">{{request.user.username}}</span>
       {% elif request.user.is_authenticated  %}
-      <img src="{% static "assets/images/user.png" %}" alt="{{request.user.username}}" width="32" height="32" class="rounded-circle shadow"><span class="title ml-2">{{request.user.username}}</span>
+      <img src="{% static "assets/img/user.png" %}" alt="{{request.user.username}}" width="32" height="32" class="rounded-circle shadow"><span class="title ml-2">{{request.user.username}}</span>
       {% else %}
-      <img src="{% static "assets/images/user.png" %}" alt="avater" width="32" height="32" class="rounded-circle shadow">
+      <img src="{% static "assets/img/user.png" %}" alt="avater" width="32" height="32" class="rounded-circle shadow">
       {% endif %}
     </a>
     <ul class="dropdown-menu dropdown-menu-end animate slideIn" style="margin-top: 50px;">

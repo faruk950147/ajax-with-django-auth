@@ -4,8 +4,8 @@
   	<title>{% block title %}  {% endblock title %} | Buy Coding </title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800,900" rel="stylesheet">
-	{% include "components/css.html" %}
+    <!--custom CSS -->
+	  {% include "components/css.html" %}
   </head>
   <body>
 		
@@ -33,11 +33,19 @@
         {% endblock main %}
         <!-- main Area -->
       </div>
-	</div>
+	  </div>
 
     {% include "components/script.html" %}
+    <script>
+      // Set position for notifications
+      alertify.set('notifier', 'position', 'top-right');
+      // Loop through Django messages and display them using Alertify
+      {% for msg in messages %}
+          alertify.success('{{ msg }}');
+      {% endfor %}
+    </script>
     {% block extra_scripts %}
-    
+
     {% endblock extra_scripts %}
   </body>
 </html>

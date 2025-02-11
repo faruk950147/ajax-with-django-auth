@@ -107,7 +107,7 @@ class SignUpView(LogoutRequiredMixin, generic.View):
                     [email]
                 )
                 EmailThread(email).start()
-                messages.success(request, 'Your account register successfully !')
+                messages.success(request, 'Your account register successfully please check email !')
                 return JsonResponse({'status': 200})
             except Exception as e:
                 return JsonResponse({'status': 400})
@@ -158,6 +158,7 @@ class SignOutView(LoginRequiredMixin, generic.View):
     login_url = reverse_lazy('sign')
     def get(self, request):
         logout(request)
+        messages.success(request, 'You are logged out successfully !')
         return redirect('sign')
     
     # def post(self, request):
@@ -261,6 +262,5 @@ class ProfileView(LoginRequiredMixin, generic.View):
                 profile_image = request.FILES.get("profile_image")
                 user_p.profile_image = profile_image
             user_p.save()
-            messages.success(request, 'Your profile edited successfully !')
             return JsonResponse({"status": 200})
         return render(request, 'account/profile.html')
