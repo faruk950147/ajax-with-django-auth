@@ -94,11 +94,12 @@
             dataType:"json",
             success:function(res){		
               if(res.status == 200){
+                alertify.success(res.messages)
                 window.location.href = "{% url 'sign' %}"
               } 
               else{
                 if(res.status == 400){
-                  $(".some-error").html("<p class='alert alert-danger'>Your account register filled</p>");
+                  alertify.error(res.messages)
                   $(".some-error").css("display", "block"); 
                 }
               }            

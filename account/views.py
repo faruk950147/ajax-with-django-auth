@@ -110,6 +110,7 @@ class SignUpView(LogoutRequiredMixin, generic.View):
                 messages.success(request, 'Your account register successfully please check email !')
                 return JsonResponse({'status': 200})
             except Exception as e:
+                messages.error(request, 'Something went wrong')
                 return JsonResponse({'status': 400})
         return render(request, 'account/register.html')
 
@@ -143,14 +144,18 @@ class SignInView(LogoutRequiredMixin, generic.View):
             if user:
                 if user.is_superuser:
                     login(request, user)
-                    return JsonResponse({'status': 200})                    
+                    messages.success(request, 'Admin login successfully !')
+                    return JsonResponse({'status': 200, 'messages': 'Admin login successfully !'})                    
                 if user.is_active:
                     login(request, user)
-                    return JsonResponse({'status': 201})
+                    messages.success(request, 'User login successfully !')
+                    return JsonResponse({'status': 201, 'messages': 'User login successfully !'})
                 else:
-                    return JsonResponse({'status': 202})
+                    messages.error(request, 'Your account is not active !')
+                    return JsonResponse({'status': 202, 'messages': 'Your account is not active !'})
             else:
-                return JsonResponse({'status': 400})
+                messages.error(request, 'Invalid username or password !')
+                return JsonResponse({'status': 400, 'messages': 'Invalid username or password !'})
         return render(request, 'account/login.html')
     
 @method_decorator(never_cache, name='dispatch')    
@@ -186,10 +191,10 @@ class ChangePasswordView(LoginRequiredMixin, generic.View):
                 user.set_password(password)
                 user.save()
                 messages.success(request, 'Your password changes successfully !')
-                return JsonResponse({'status': 200})
+                return JsonResponse({'status': 200, 'messages': 'Your password changes successfully !'})
             else:
                 messages.error(request, 'Your current password is wrong !')
-                return JsonResponse({'status': 400})
+                return JsonResponse({'status': 400, 'messages': 'Your current password is wrong !'})
         return render(request, 'account/changes-password.html')
     
 @method_decorator(never_cache, name='dispatch')    
@@ -211,10 +216,9 @@ class ResetPasswordView(LogoutRequiredMixin, generic.View):
                         [email]
                     )
                     EmailThread(email).start()
-                    return JsonResponse({"status": 200, 'otp': otp, 'email': user.email})
+                    return JsonResponse({"status": 200, 'otp': otp, 'email': user.email, 'messages': 'Please check your email'})
             except Exception as e:
-                messages.error(request, 'Something went wrong')
-                return JsonResponse({"status": 400})
+                    return JsonResponse({"status": 400, 'messages': 'Invalid email'})
     
 @method_decorator(never_cache, name='dispatch')    
 class ForgotPasswordView(LogoutRequiredMixin, generic.View):
@@ -228,8 +232,9 @@ class ForgotPasswordView(LogoutRequiredMixin, generic.View):
             user.set_password(password)
             user.save()
             if user.is_active:
-                messages.success(request, 'Your password reset successfully !')
-                return JsonResponse({'status': 200})
+                return JsonResponse({'status': 200, 'messages': 'Your password reset successfully !'})
+            else:
+                return JsonResponse({'status': 400,  'messages': 'Your account is not active'})
         return render(request, 'account/reset-password.html')
 
 @method_decorator(never_cache, name='dispatch')    
@@ -262,5 +267,5 @@ class ProfileView(LoginRequiredMixin, generic.View):
                 profile_image = request.FILES.get("profile_image")
                 user_p.profile_image = profile_image
             user_p.save()
-            return JsonResponse({"status": 200})
+            return JsonResponse({"status": 200, 'messages': 'Your profile updated successfully!'})
         return render(request, 'account/profile.html')

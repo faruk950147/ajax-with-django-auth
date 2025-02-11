@@ -1,8 +1,9 @@
-{% load static %}
-{% if messages %}
-    {% for message in messages %}
-    <div class="text-justify text-center alert alert-sm alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-      <strong>{{message}}</strong>
-    </div>
-    {% endfor %}
-{% endif %}
+{% load static %}    
+<script>
+  // Set position for notifications
+  alertify.set('notifier', 'position', 'top-right');
+  // Loop through Django messages and display them using Alertify
+  {% for msg in messages %}
+      alertify.success('{{ msg }}');
+  {% endfor %}
+</script>

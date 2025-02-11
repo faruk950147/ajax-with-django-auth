@@ -79,17 +79,19 @@
               success:function(res){		
                 if(res.status == 200){
                   window.location.href = "/admin"
+                  alertify.success(res.messages)
                 } 
                 else if(res.status == 201){
                   window.location.href = "{% url 'home' %}"
+                  alertify.success(res.messages)
                 }                
                 else if(res.status == 202){
-                  $(".some-error").html("<p class='alert alert-danger'>Your account is not activated please check your email</p>");
                   $(".some-error").css("display", "block");  
+                  alertify.error(res.messages)
                 }
                 else{
                   if(res.status == 400){
-                    $(".some-error").html("<p class='alert alert-danger'>Your password is invalid</p>");
+                    alertify.error(res.messages)
                     $(".some-error").css("display", "block"); 
                   }
                 }
