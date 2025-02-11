@@ -143,17 +143,13 @@ class SignInView(LogoutRequiredMixin, generic.View):
             if user:
                 if user.is_superuser:
                     login(request, user)
-                    messages.success(request, 'You are admin logged in successfully !')
                     return JsonResponse({'status': 200})                    
                 if user.is_active:
                     login(request, user)
-                    messages.success(request, 'You are user logged in successfully !')
                     return JsonResponse({'status': 201})
                 else:
-                    messages.error(request, 'Your account is not activated please check your email')
                     return JsonResponse({'status': 202})
             else:
-                messages.error(request, 'Invalid username or password')
                 return JsonResponse({'status': 400})
         return render(request, 'account/login.html')
     
@@ -214,7 +210,6 @@ class ResetPasswordView(LogoutRequiredMixin, generic.View):
                         [email]
                     )
                     EmailThread(email).start()
-                    messages.success(request, 'We have sent you an email with otp to reset your password')
                     return JsonResponse({"status": 200, 'otp': otp, 'email': user.email})
             except Exception as e:
                 messages.error(request, 'Something went wrong')
