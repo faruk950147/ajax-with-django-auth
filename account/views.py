@@ -150,7 +150,7 @@ class SignInView(LogoutRequiredMixin, generic.View):
                     messages.success(request, 'You are user logged in successfully !')
                     return JsonResponse({'status': 201})
                 else:
-                    messages.error(request, 'Your account is not active')
+                    messages.error(request, 'Your account is not activated please check your email')
                     return JsonResponse({'status': 202})
             else:
                 messages.error(request, 'Invalid username or password')
