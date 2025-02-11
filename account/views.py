@@ -33,10 +33,8 @@ class UsernameValidationView(generic.View):
         data = json.loads(request.body)
         username = data.get('username')
         if not str(username).isalnum():
-            messages.error(request, 'Username should only contain alphanumeric characters')
             return JsonResponse({'username_error': 'Username should only contain alphanumeric characters'})
         if User.objects.filter(username=username).exists():
-            messages.error(request, 'Sorry username in used,choose another one')
             return JsonResponse({'username_error': 'Sorry username in used,choose another one'})
         return JsonResponse({'username_valid': True})
 
@@ -46,10 +44,8 @@ class EmailValidationView(generic.View):
         data = json.loads(request.body)
         email = data.get('email')
         if not validate_email(email):
-            messages.error(request, 'Email is invalid')
             return JsonResponse({'email_error': 'Email is invalid'})
         if User.objects.filter(email=email).exists():
-            messages.error(request, 'Sorry email in used,choose another one ')
             return JsonResponse({'email_error': 'Sorry email in used,choose another one '})
         return JsonResponse({'email_valid': True})
         
@@ -61,10 +57,8 @@ class PasswordValidationView(generic.View):
         password2 = data.get('password2')
         
         if password != password2:
-            messages.error(request, 'Your password do not matches !')
             return JsonResponse({'password_error': 'Your password do not matches !'})
         if len(password) and len(password2) < 8:
-            messages.info(request, 'Your password too shorts !')
             return JsonResponse({'password_info': 'Your password too shorts !'})
         return JsonResponse({'password_valid': True})
 
@@ -74,7 +68,6 @@ class LoginUsernameValidationView(generic.View):
         data = json.loads(request.body)
         username = data.get('username')
         if not User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).exists():
-            messages.error(request, 'Sorry there is no account with this username or this email, choose another one !')
             return JsonResponse({'username_error': 'Sorry there is no account with this username or this email, choose another one !'})
         return JsonResponse({'username_valid': True})
     
@@ -125,16 +118,13 @@ class ActivationView(generic.View):
     def get(self, request, uidb64, token):
         try:
             id = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(id=id)
+            user = get_object_or_404(User, id=id)
             if not account_activation_token.check_token(user, token):
-                messages.error(request, 'Invalid token provided')
-                return redirect('sign')
-            if user.is_active:
-                messages.error(request, 'Account already activated')
+                messages.error(request, 'This token already used or invalid')
                 return redirect('sign')
             user.is_active = True
             user.save()
-            messages.success(request, 'Account activated successfully')
+            messages.success(request, 'Your account activated successfully !')
             return redirect('sign')
         except Exception as e:
             messages.error(request, 'Something went wrong')
@@ -153,11 +143,11 @@ class SignInView(LogoutRequiredMixin, generic.View):
             if user:
                 if user.is_superuser:
                     login(request, user)
-                    messages.success(request, 'You are logged in successfully !')
+                    messages.success(request, 'You are admin logged in successfully !')
                     return JsonResponse({'status': 200})                    
                 if user.is_active:
                     login(request, user)
-                    messages.success(request, 'You are logged in successfully !')
+                    messages.success(request, 'You are user logged in successfully !')
                     return JsonResponse({'status': 201})
                 else:
                     messages.error(request, 'Your account is not active')
