@@ -63,13 +63,22 @@
         <div class="row">
           <div class="col-lg-4">
             <div class="card mb-4">
-              <ul class="list-group">
-                <li class="list-group-item">An item</li>
-                <li class="list-group-item">A second item</li>
-                <li class="list-group-item">A third item</li>
-                <li class="list-group-item">A fourth item</li>
-                <li class="list-group-item">And a fifth one</li>
-              </ul>
+              <div class="billing-details">
+                <div class="section-title">
+                    <h3 class="title">User Panel</h3>
+                </div>
+                <div class="aside">
+                <ul class="list-links">
+                    <li><a href="/user">User Profile</a></li>
+                    <li><a href="/user/orders">My Orders</a></li>
+                    <li><a href="/user/orders_product">My Order Product</a></li>
+                    <li><a href="/user/comments">My Comments</a></li>
+                    <li><a href="/user/favorits">My Favorits</a></li>
+                    <li><a href="/user/products">My Products</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </div>
+            </div>
             </div>
           </div>
           <div class="col-lg-8">
@@ -78,7 +87,7 @@
                 <div class="row">
                     <div class="col-sm-12">
                       <div class="edit_profile" style="float: inline-end;">
-                        <button type="button" class="btn btn-primary btn-round text-center" data-toggle="tooltip" data-placement="top" title="Edit Profile" id="toggleBtn">
+                        <button type="button" class="btn primary-btn btn-round text-center" data-toggle="tooltip" data-placement="top" title="Edit Profile" id="toggleBtn">
                           <i class="fas fa-pen-nib"></i>
                          </button>
                       </div>
@@ -88,7 +97,7 @@
                           <img src="{{request.user.profiles.profile_image.url}}" alt="{{request.user.username}}"
                           class="rounded-circle img-fluid shadow-lg" style="width: 150px;">
                           {% else %}
-                          <img src="{% static "assets/img/user.png" %}" alt="{{request.user.username}}"
+                          <img src="{% static "img/user.png" %}" alt="{{request.user.username}}"
                           class="rounded-circle img-fluid shadow-lg" style="width: 150px;">
                           {% endif %}  
                         </div>
@@ -224,6 +233,9 @@
                   $(".editBox").hide(1000)
                   $('.profileBox').load(window.location.href + ' .profileBox');
                   alertify.success(res.messages)
+                }
+                else if(res.status == 400){
+                  alertify.error(res.messages)
                 }
               }
             });

@@ -162,9 +162,13 @@ class SignInView(LogoutRequiredMixin, generic.View):
 class SignOutView(LoginRequiredMixin, generic.View):
     login_url = reverse_lazy('sign')
     def get(self, request):
-        logout(request)
-        messages.success(request, 'You are logged out successfully !')
-        return redirect('sign')
+        if request.user.is_authenticated:
+            logout(request)
+            messages.success(request, 'You are logged out successfully !')
+            return redirect('sign')
+        else:
+            messages.error(request, 'You are not logged in !')
+            return redirect('sign')
     
     # def post(self, request):
     #     if request.method == "POST" or request.method == "post" and request.is_ajax():
@@ -182,19 +186,23 @@ class ChangePasswordView(LoginRequiredMixin, generic.View):
     def get(self, request):
         return render(request, 'account/changes-password.html')
     def post(self, request):
-        if request.method == "POST" or request.method == "post" and request.is_ajax():
-            current_password = request.POST.get('current_password')
-            password = request.POST.get('password')
-            user = get_object_or_404(User, id=request.user.id)     
-            check_current_password = user.check_password(current_password)
-            if check_current_password == True:
-                user.set_password(password)
-                user.save()
-                messages.success(request, 'Your password changes successfully !')
-                return JsonResponse({'status': 200, 'messages': 'Your password changes successfully !'})
-            else:
-                messages.error(request, 'Your current password is wrong !')
-                return JsonResponse({'status': 400, 'messages': 'Your current password is wrong !'})
+        if request.user.is_authenticated:
+            if request.method == "POST" or request.method == "post" and request.is_ajax():
+                current_password = request.POST.get('current_password')
+                password = request.POST.get('password')
+                user = get_object_or_404(User, id=request.user.id)     
+                check_current_password = user.check_password(current_password)
+                if check_current_password == True:
+                    user.set_password(password)
+                    user.save()
+                    messages.success(request, 'Your password changes successfully !')
+                    return JsonResponse({'status': 200, 'messages': 'Your password changes successfully !'})
+                else:
+                    messages.error(request, 'Your current password is wrong !')
+                    return JsonResponse({'status': 400, 'messages': 'Your current password is wrong !'})
+        else:
+            messages.error(request, 'You are not logged in !')
+            return JsonResponse({'status': 401, 'messages': 'You are not logged in !'})
         return render(request, 'account/changes-password.html')
     
 @method_decorator(never_cache, name='dispatch')    
@@ -243,29 +251,32 @@ class ProfileView(LoginRequiredMixin, generic.View):
     def get(self, request):
         return render(request, 'account/profile.html')
     def post(self, request):
-        if request.method == "POST" or request.method == "post" or request.FILES and request.is_ajax():
-            username = request.POST.get("username")
-            email = request.POST.get("email")
-            country = request.POST.get("country")
-            city = request.POST.get("city")
-            home_city = request.POST.get("home_city")
-            zip_code = request.POST.get("zip_code")
-            phone = request.POST.get("phone")
-            address = request.POST.get("address")
-            user = get_object_or_404(User, id=request.user.id)
-            user.username = username
-            user.email = email
-            user.save()
-            user_p = get_object_or_404(Profile, user=request.user.id)
-            user_p.country = country
-            user_p.city = city
-            user_p.home_city = home_city
-            user_p.zip_code = zip_code
-            user_p.phone = phone
-            user_p.address = address
-            if "profile_image" in request.FILES:
-                profile_image = request.FILES.get("profile_image")
-                user_p.profile_image = profile_image
-            user_p.save()
-            return JsonResponse({"status": 200, 'messages': 'Your profile updated successfully!'})
+        if request.user.is_authenticated:
+            if request.method == "POST" or request.method == "post" or request.FILES and request.is_ajax():
+                username = request.POST.get("username")
+                email = request.POST.get("email")
+                country = request.POST.get("country")
+                city = request.POST.get("city")
+                home_city = request.POST.get("home_city")
+                zip_code = request.POST.get("zip_code")
+                phone = request.POST.get("phone")
+                address = request.POST.get("address")
+                user = get_object_or_404(User, id=request.user.id)
+                user.username = username
+                user.email = email
+                user.save()
+                user_p = get_object_or_404(Profile, user=request.user.id)
+                user_p.country = country
+                user_p.city = city
+                user_p.home_city = home_city
+                user_p.zip_code = zip_code
+                user_p.phone = phone
+                user_p.address = address
+                if "profile_image" in request.FILES:
+                    profile_image = request.FILES.get("profile_image")
+                    user_p.profile_image = profile_image
+                user_p.save()
+                return JsonResponse({"status": 200, 'messages': 'Your profile updated successfully!'})
+        else:
+            return JsonResponse({"status": 400, 'messages': 'Your are not authenticated'})
         return render(request, 'account/profile.html')
