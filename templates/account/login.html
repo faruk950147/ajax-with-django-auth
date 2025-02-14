@@ -85,14 +85,12 @@
                   window.location.href = "{% url 'home' %}"
                   alertify.success(res.messages)
                 }                
-                else if(res.status == 202){
-                  $(".some-error").css("display", "block");  
+                else if(res.status == 403){  
                   alertify.error(res.messages)
                 }
                 else{
                   if(res.status == 400){
                     alertify.error(res.messages)
-                    $(".some-error").css("display", "block"); 
                   }
                 }
               },
