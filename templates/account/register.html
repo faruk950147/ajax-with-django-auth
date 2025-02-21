@@ -6,50 +6,45 @@
   <div class="container">
     <div class="d-flex flex-column text-center" style="max-width: 600px; margin: 0 auto;">
       <div class="form-title text-center" style="margin: 50px;">
-        <h4 class="title0">Sign Up</h4>
+        <h4 class="title">Sign Up</h4>
       </div>
       <form  id="form" method="POST">
-        {% csrf_token %}
-
-        <div class"form-group" style="margin-top: 15px;">
-          <input type="text" name="username" placeholder="Username" id="id_username" class="form-control" required/>
-        </div>
+        <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
         <div class="username-error form-group" style="display: none">
 
         </div>
 
-        <div class="form-group" style="margin-top: 15px;">
-          <input type="email" name="email" placeholder="Email" id="id_email" class="form-control" required/>
+        <div class"form-group" style="margin: 15px;">
+          <input type="text" name="username" placeholder="Username" id="id_username" class="form-control" required/>
         </div>
 
         <div class="email-error form-group" style="display: none">
 
         </div>
 
-        <div class="form-group" style="margin-top: 15px;">
-          <input type="password" name="password" placeholder="Password" id="id_password" class="form-control" required/>
+        <div class="form-group" style="margin: 15px;">
+          <input type="email" name="email" placeholder="Email" id="id_email" class="form-control" required/>
         </div>
-      
-        <div class="form-group eye-add" style="margin-top: 15px;">
-          <input type="password" name="password2" placeholder="Confirm Password" id="id_password2" class="form-control" required/>
-            <span class="text-muted eye-add-style" id="showHide">
-            <i class="fas fa-eye-slash fa-lg me-3 fa-fw text-info" id="icon"></i></span>
+
+        <div class="form-group" style="margin: 15px;">
+          <input type="password" name="password" placeholder="Password" id="id_password" class="form-control" required/>
         </div>
 
         <div class="password-error form-group" style="display: none">
                       
         </div>
 
-        <div class="form-group" style="margin-top: 15px; display: flex; justify-content: space-between;">
-          <span  class="text-muted" style="padding: 8px;"> <a href="{% url "sign" %}" class="text-info text-decoration-none">Sign In</a> </span>
-            <span  class="text-muted" style="padding: 8px;"> <a href="{% url "forgotpassword" %}" class="text-info text-decoration-none">Reset Password</a> </span>
+        <div class="form-group eye-add" style="margin: 15px;">
+          <input type="password" name="password2" placeholder="Confirm Password" id="id_password2" class="form-control" required/>
+            <span class="text-muted eye-add-style" id="showHide">
+            <i class="fas fa-eye-slash fa-lg me-3 fa-fw text-info" id="icon"></i></span>
         </div>
 
-        <div class="form-group" style="margin-top: 15px;">
+        <div class="form-group" style="margin: 15px;">
           <button  type="button" class="btn btn-info btn-lg form-control" id="signupBtn">Sign Up</button>
         </div>
       </form>
-      
+      <span class="text-muted">Already have an account? <a href="{% url 'sign' %}">Sign In</a></span>
       <div class="text-center text-muted delimiter">or use a social network</div>
       <div class="d-flex justify-content-center social-buttons m-2">
         <button type="button" class="btn btn-info btn-round m-2" data-toggle="tooltip" data-placement="top" title="Twitter">
@@ -69,152 +64,152 @@
 {% block extra_scripts %}
 <script>
   $(document).ready(function(){
-    $('#signupBtn').on('click', function(e){
-        e.preventDefault()
-        let username = $('#form #id_username').val()
-        let email = $('#form #id_email').val()
-        let password = $('#form #id_password').val()
-        let password2 = $('#form #id_password2').val()
-        let csrfmiddlewaretoken = $('#form input[name=csrfmiddlewaretoken]').val()
-        let data = new FormData()
-        data.append("username", username)
-        data.append("email", email)
-        data.append("password", password)
-        data.append("password2", password2)
-        data.append("csrfmiddlewaretoken", csrfmiddlewaretoken)
-        // Run Ajax
-        if(username.length > 0 && email.length > 0 && password.length > 0){
-          $.ajax({
-            url:"{% url 'signup' %}",
-            method:"POST",
-            processData:false,
-            contentType:false,
-            mimeType:"multipart/form-data",
-            data:data,
-            dataType:"json",
-            success:function(res){		
-              if(res.status == 200){
-                alertify.success(res.messages)
-                window.location.href = "{% url 'sign' %}"
-              } 
-              else{
-                if(res.status == 400){
-                  alertify.error(res.messages)
-                }
-              }            
-            },
-          });
-        }
-        else{
-          if(username == ""){
-            alertify.error('Please fill up your username')
-          }
-          if(email == ""){
-            alertify.error('Please fill up your email')
-          }
-          if(password == ""){
-            alertify.error('Please fill up your password')
-          }
-          if(password2 == ""){
-            alertify.error('Please fill up your password2')
-          }
-        }
-    });
     
-    $( "#id_username" ).on( "keyup", function(e){
+  $('#signupBtn').on('click', function(e) {
       e.preventDefault();
-      const username = e.currentTarget.value;
-      if(username.length > 0){
-        $.ajax({
-          url:"{% url 'usernamevalidation' %}",
-          method:"POST",
-          data: JSON.stringify({username:username}),
-          dataType:"json",
-          success:function(res){	
-            if(res.username_error){
-              $("#id_username").addClass("is-invalid");
-              $(".username-error").html(res.username_error);
-              $(".username-error").css("display", "block");
-              $("#signupBtn").attr('disabled', true);
-            }
-            else{
-              if(res.username_valid){
-                $("#id_username").removeClass("is-invalid");
-                $("#id_username").addClass("is-valid");
-                $(".username-error").css("display", "none");
-                $("#signupBtn").attr('disabled', false);
+  
+      let username = $('#form #id_username').val().trim();
+      let email = $('#form #id_email').val().trim();
+      let password = $('#form #id_password').val().trim();
+      let password2 = $('#form #id_password2').val().trim();
+      let csrfmiddlewaretoken = $("input[name=csrfmiddlewaretoken]").val();
+  
+  
+      // Client-side validation
+      if (username.length > 0 && email.length > 0 && password.length > 0 && password === password2) {
+          $.ajax({
+              url: "{% url 'signup' %}",
+              method: "POST",
+              headers: {
+                  "X-CSRFToken": csrfmiddlewaretoken  // CSRF token passing
+              },
+              contentType: "application/json",
+              data: JSON.stringify({
+                  username: username,
+                  email: email,
+                  password: password,
+                  password2: password2
+              }),
+              dataType: "json",
+              success: function(res) {
+                  if (res.status == 200) {
+                      alertify.success(res.messages);
+                      $('#form').load(location.href + ' #form');
+                      // Optionally, redirect or show a success message
+                  } else if (res.status == 400) {
+                      alertify.error(res.messages);
+                  }
               }
-            } 
-          },
-        });
+          });
+      } else {
+          if (username == "") alertify.error('Please fill up your username');
+          if (email == "") alertify.error('Please fill up your email');
+          if (password == "") alertify.error('Please fill up your password');
+          if (password2 == "") alertify.error('Please fill up your confirm password');
+          if (password !== password2) alertify.error('Passwords do not match');
       }
-    });
-
-    $( "#id_email" ).on( "keyup", function(e){
-      e.preventDefault();
-      const email = e.currentTarget.value;
-      if(email.length > 0){
-        $.ajax({
-          url:"{% url 'emailvalidation' %}",
-          method:"POST",
-          data: JSON.stringify({email:email}),
-          dataType:"json",  
-          success:function(res){
-            if(res.email_error){
-              $("#id_email").addClass("is-invalid")
-              $(".email-error").html(res.email_error)
-              $(".email-error").css("display", "block");
-              $("#signupBtn").attr('disabled', true);
-            }
-            else{
-              if(res.email_valid){
-                $("#id_email").removeClass("is-invalid")
-                $("#id_email").addClass("is-valid")
-                $(".email-error").css("display", "none");   
-                $("#signupBtn").attr('disabled', false);             
-              }
-            }
-          }       
-        });
-      }
-    });
-
-    $("#id_password, #id_password2").on("keyup", function(e){
-      e.preventDefault()
-      let password = $("#id_password").val();
-      let password2 = $("#id_password2").val();
-      if(password.length > 0 && password2.length > 0){
-        $.ajax({
-          url:"{% url 'passwordvalidation' %}",
-          method:"POST",
-          data: JSON.stringify({password:password, password2:password2}),
-          dataType:"json",  
-          success:function(res){
-            if(res.password_error){
-              $("#id_password, #id_password2").addClass("is-invalid")
-              $(".password-error").html(res.password_error)
-              $(".password-error").css("display", "block");
-              $("#signupBtn").attr('disabled', true);
-            }
-            if(res.password_info){
-              $("#id_password, #id_password2").removeClass("is-invalid")
-              $("#id_password, #id_password2").addClass("is-valid")
-              $(".password-error").html(res.password_info)
-              $(".password-error").css("display", "block");
+  })
+    
+   //All Validation
+  $( "#id_username" ).on( "keyup blur change input focus", function(e){
+    e.preventDefault();
+    const username = $("#form #id_username").val().trim();
+    if(username.length > 0){
+      $.ajax({
+        url:"{% url 'usernamevalidation' %}",
+        method:"POST",
+        data: JSON.stringify({username:username}),
+        contentType: "application/json",
+        dataType:"json",
+        success:function(res){
+          if(res.username_error){
+            $("#id_username").addClass("is-invalid");
+            $(".username-error").html(res.username_error);
+            $(".username-error").css("display", "block");
+            $("#signupBtn").attr('disabled', true);
+          }
+          else{
+            if(res.username_valid){
+              $("#id_username").removeClass("is-invalid");
+              $("#id_username").addClass("is-valid");
+              $(".username-error").css("display", "none");
               $("#signupBtn").attr('disabled', false);
             }
-            else{
-              if(res.password_valid){
-                $("#id_password, #id_password2").removeClass("is-invalid")
-                $("#id_password, #id_password2").addClass("is-valid")
-                $(".password-error").css("display", "none");   
-                $("#signupBtn").attr('disabled', false);             
-              }
+          } 
+        },
+      });
+    }
+  });
+
+  $( "#id_email" ).on( "keyup blur change input focus", function(e){
+    e.preventDefault();
+    const email = $("#form #id_email").val().trim();
+    if(email.length > 0){
+      $.ajax({
+        url:"{% url 'emailvalidation' %}",
+        method:"POST",
+        data: JSON.stringify({email:email}),
+        contentType: "application/json",
+        dataType:"json",  
+        success:function(res){
+          if(res.email_error){
+            $("#id_email").addClass("is-invalid")
+            $(".email-error").html(res.email_error)
+            $(".email-error").css("display", "block");
+            $("#signupBtn").attr('disabled', true);
+          }
+          else{
+            if(res.email_valid){
+              $("#id_email").removeClass("is-invalid")
+              $("#id_email").addClass("is-valid")
+              $(".email-error").css("display", "none");   
+              $("#signupBtn").attr('disabled', false);             
             }
-          }       
-        });
-      }
-    });
+          }
+        }       
+      });
+    }
+  });
+
+  $("#id_password, #id_password2").on("keyup blur change input focus", function(e){
+    e.preventDefault()
+    let password = $("#form #id_password").val().trim();
+    let password2 = $("#form #id_password2").val().trim();
+    if(password.length > 0 && password2.length > 0){
+      $.ajax({
+        url:"{% url 'passwordvalidation' %}",
+        method:"POST",
+        data: JSON.stringify({password:password, password2:password2}),
+        contentType: "application/json",
+        dataType:"json",  
+        success:function(res){
+          if(res.password_error){
+            $("#id_password, #id_password2").addClass("is-invalid")
+            $(".password-error").html(res.password_error)
+            $(".password-error").css("display", "block");
+            $("#signupBtn").attr('disabled', true);
+          }
+          if(res.password_info){
+            $("#id_password, #id_password2").removeClass("is-invalid")
+            $("#id_password, #id_password2").addClass("is-valid")
+            $(".password-error").html(res.password_info)
+            $(".password-error").css("display", "block");
+            $("#signupBtn").attr('disabled', false);
+          }
+          else{
+            if(res.password_valid){
+              $("#id_password, #id_password2").removeClass("is-invalid")
+              $("#id_password, #id_password2").addClass("is-valid")
+              $(".password-error").css("display", "none");   
+              $("#signupBtn").attr('disabled', false);             
+            }
+          }
+        }       
+      });
+    }
+  });
+  //All Validation
+
 
   }); 
 </script>

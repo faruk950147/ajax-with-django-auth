@@ -13,8 +13,8 @@
     </a>
     <ul class="dropdown-menu dropdown-menu-end animate slideIn" style="margin-top: 50px;">
       {% if request.user.is_authenticated %}
-      <li><a class="dropdown-item" href="{% url "profile" %}">Profile</a></li>
-      <li><a class="dropdown-item" href="{% url "changepassword" %}">Changes Password</a></li>
+      <li><a class="dropdown-item" href="{% url "profileview" %}">Profile</a></li>
+      <li><a class="dropdown-item" href="{% url "changespassword" %}">Changes Password</a></li>
       <li><a class="dropdown-item" href="">Activity {{request.user.is_active}}</a></li>
       <li><hr class="dropdown-divider"></li>
       <li><a class="dropdown-item" href="{% url "signout" %}">Sign Out</a></li>

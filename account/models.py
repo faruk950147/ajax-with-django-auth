@@ -13,7 +13,6 @@ from django.utils.html import mark_safe
 
 #account apps 
 from account.managers import UserManager
-import uuid
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
@@ -61,8 +60,7 @@ class Profile(models.Model):
     def image_tag(self):   
         if self.profile_image:
             return mark_safe('<img src="%s" width="50" height="50"/>' % (self.profile_image.url))
-        else:
-            return ""
+        return mark_safe('<span>No Image</span>')  
         
     def __str__(self):
         return f"{self.user.username}'s Profile"   

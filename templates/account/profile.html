@@ -10,20 +10,24 @@
             <h4 class="title0">Profile</h4>
           </div>
           <form id="form" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class"form-group" style="margin-top: 15px;">
-              <input type="text" name="username" placeholder="Username" id="id_username" class="form-control" value="{{request.user.username}}" required/>
-            </div>
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
             <div class="username-error form-group" style="display: none">
       
             </div>
-      
-            <div class="form-group" style="margin-top: 15px;">
-              <input type="email" name="email" placeholder="Email" id="id_email" class="form-control" value="{{request.user.email}}" required/>
+
+            <div class"form-group" style="margin-top: 15px;">
+              <input type="text" name="username" placeholder="Username" id="id_username" class="form-control" value="{{request.user.username}}" required/>
             </div>
+
             <div class="email-error form-group" style="display: none">
       
             </div>
+
+            <div class="form-group" style="margin-top: 15px;">
+              <input type="email" name="email" placeholder="Email" id="id_email" class="form-control" value="{{request.user.email}}" required/>
+            </div>
+
       
             <div class="form-group" style="margin-top: 15px;">
               <input type="text" name="country" placeholder="Country" id="id_country" class="form-control" value="{{request.user.profiles.country}}" required/>
@@ -194,9 +198,9 @@
       $(document).ready(function(){
         $("#toggleBtn").on("click", function(e){
           e.preventDefault()
-          $(".editBox").stop().fadeToggle(1000)
+        $(".editBox").stop().fadeToggle(1000)
         });
-
+        //edit profile
         $("#editBtn").on("click", function(e){
           e.preventDefault()
           let username = $("#form #id_username").val()
@@ -207,6 +211,7 @@
           let zip_code = $("#form #id_zip_code").val()
           let phone = $("#form #id_phone").val()
           let address = $("#form #id_address").val()
+          let profile_image =  $("input[id^='id_profile_image']")[0].files[0]
           let csrfmiddlewaretoken = $('#form input[name=csrfmiddlewaretoken]').val();
           let data = new FormData()
           data.append("username", username)
@@ -217,11 +222,11 @@
           data.append("zip_code", zip_code)
           data.append("phone", phone)
           data.append("address", address)
-          data.append("profile_image", $("input[id^='id_profile_image']")[0].files[0])
+          data.append("profile_image", profile_image)
           data.append("csrfmiddlewaretoken", csrfmiddlewaretoken)
           if(username.length > 0 && email.length > 0 && country.length > 0 && city.length > 0 && home_city.length > 0 && zip_code.length > 0 && phone.length > 0 && address.length > 0){
             $.ajax({
-              url:"{% url 'profile' %}",
+              url:"{% url 'profileview' %}",
               method:"POST",
               processData:false,
               contentType:false,
@@ -268,7 +273,7 @@
           }
         });
 
-        $( "#id_username" ).on( "keyup", function(e){
+        $( "#id_username" ).on( "keyup blur change input focus", function(e){
           e.preventDefault();
           const username = e.currentTarget.value;
           if(username.length > 0){
@@ -297,7 +302,7 @@
           }
         });
 
-        $( "#id_email" ).on( "keyup", function(e){
+        $( "#id_email" ).on( "keyup blur change input focus", function(e){
           e.preventDefault();
           const email = e.currentTarget.value;
           if(email.length > 0){
