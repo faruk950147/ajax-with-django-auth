@@ -122,7 +122,7 @@ class ActivationView(generic.View):
             user.is_active = True
             user.save()
             messages.success(request, 'Your account has been activated successfully!')
-            return redirect('home')  # Redirect to login page after activation
+            return redirect('sign')  # Redirect to login page after activation
 
         except (TypeError, ValueError, OverflowError) as e:
             messages.error(request, 'The activation link is invalid or expired.')
