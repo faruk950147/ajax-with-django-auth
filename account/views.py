@@ -19,7 +19,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from validate_email import validate_email
 from account.mixins import LogoutRequiredMixin
-from account.utils import account_activation_token, EmailThread
+from account.utils import account_activation_token, EmailThread, send_activation_email
 from account.forms import SignUpForm, SignInForm, ChangePasswordForm, ResetPasswordForm, ResetPasswordConfirmForm
 from account.models import Profile
 from django.contrib.auth.password_validation import validate_password
@@ -154,16 +154,7 @@ class SignUpView(LogoutRequiredMixin, generic.View):
             user.save()
 
             # Sending activation email
-            current_site = get_current_site(request)
-            uid = urlsafe_base64_encode(force_bytes(user.id))
-            token = account_activation_token.make_token(user)
-            activation_url = f"http://{current_site.domain}{reverse_lazy('activationview', kwargs={'uidb64': uid, 'token': token})}"
-
-            email_subject = 'Just one more step - Verify your account'
-            message = f"Hello {user.username},\n\nWe're happy you're joining us! Please verify your account using the link below:\n{activation_url}\n\nThanks,\nYour App Team"
-
-            email_message = EmailMessage(email_subject, message, settings.EMAIL_HOST_USER, [email])
-            EmailThread(email_message).start()
+            send_activation_email(user, request, email)
             
             return JsonResponse({'status': 200, 'messages': 'Your account was registered successfully. Please check your email!'})
         except json.JSONDecodeError:
