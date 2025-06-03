@@ -27,83 +27,83 @@ from django.core.exceptions import ValidationError
 import json
 import random
 User = get_user_model()
+
 OTP_EXPIRATION_TIME = 300  # 5 minutes in seconds
 from django.core.cache import cache
+
+import logging
+logger = logging.getLogger(__name__)
 
 # Create your views here.
 @method_decorator(never_cache, name='dispatch')
 class UsernameValidationView(generic.View):
     def post(self, request):
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
-                username = data.get('username', '').strip()
+        try:
+            data = json.loads(request.body)
+            username = data.get('username', '').strip()
 
-                if not isinstance(username, str) or not username.isalnum():
-                    return JsonResponse({'username_error': 'Username should only contain alphanumeric characters', 'status': 400})
+            if not isinstance(username, str) or not username.isalnum():
+                return JsonResponse({'username_error': 'Username should only contain alphanumeric characters', 'status': 400})
 
-                if User.objects.filter(username=username).exists():
-                    return JsonResponse({'username_error': 'Sorry, this username is already taken. Choose another one.', 'status': 400})
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({'username_error': 'Sorry, this username is already taken. Choose another one.', 'status': 400})
 
-                return JsonResponse({'username_valid': True})
+            return JsonResponse({'username_valid': True})
 
-            except json.JSONDecodeError:
-                return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
 
 @method_decorator(never_cache, name='dispatch')
 class EmailValidationView(generic.View):
     def post(self, request):    
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
-                email = data.get('email', '').strip()
+        try:
+            data = json.loads(request.body)
+            email = data.get('email', '').strip()
 
-                if not validate_email(email):
+            if not validate_email(email):
                     return JsonResponse({'email_error': 'Email is invalid', 'status': 400})
                     
-                if User.objects.filter(email__iexact=email).exists():
-                    return JsonResponse({'email_error': 'Sorry, this email is already in use. Choose another one.', 'status': 400})
+            if User.objects.filter(email__iexact=email).exists():
+                return JsonResponse({'email_error': 'Sorry, this email is already in use. Choose another one.', 'status': 400})
 
-                return JsonResponse({'email_valid': True})
+            return JsonResponse({'email_valid': True})
 
-            except json.JSONDecodeError:
-                return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
         
 @method_decorator(never_cache, name='dispatch')
 class PasswordValidationView(generic.View):
     def post(self, request):   
-        if request.method == "POST": 
-            try:
-                data = json.loads(request.body)
-                password = data.get('password', '').strip()
-                password2 = data.get('password2', '').strip()
+        try:
+            data = json.loads(request.body)
+            password = data.get('password', '').strip()
+            password2 = data.get('password2', '').strip()
 
-                if password != password2:
-                    return JsonResponse({'password_error': 'Passwords does not match!', 'status': 400})
+            if password != password2:
+                return JsonResponse({'password_error': 'Passwords does not match!', 'status': 400})
 
-                if len(password) < 8:
-                    return JsonResponse({'password_info': 'Your password is too short! It must be at least 8 characters long.', 'status': 400})
+            if len(password) < 8:
+                return JsonResponse({'password_info': 'Your password is too short! It must be at least 8 characters long.', 'status': 400})
 
-                return JsonResponse({'password_valid': True})
+            return JsonResponse({'password_valid': True})
 
-            except json.JSONDecodeError:
-                return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
 
 @method_decorator(never_cache, name='dispatch')
 class SignInValidationView(generic.View):
     def post(self, request):
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
-                username = data.get('username', '').strip()
+        try:
+            data = json.loads(request.body)
+            username = data.get('username', '').strip()
 
-                if not User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).exists():
-                    return JsonResponse({'username_error': 'No account found with this username or email. Please try again.', 'status': 400})
+            if not User.objects.filter(Q(username__iexact=username) | Q(email__iexact=username)).exists():
+                return JsonResponse({'username_error': 'No account found with this username or email. Please try again.', 'status': 400})
 
-                return JsonResponse({'username_valid': True})
+            return JsonResponse({'username_valid': True})
 
-            except json.JSONDecodeError:
-                return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data', 'status': 400})
     
 @method_decorator(never_cache, name='dispatch')
 class ActivationView(generic.View):
@@ -137,51 +137,40 @@ class SignUpView(LogoutRequiredMixin, generic.View):
         return render(request, 'account/register.html')
 
     def post(self, request):
-        if request.method == "POST":  # Only handle AJAX requests
-            try:
-                # Parse the JSON data from request body
-                data = json.loads(request.body)
-                username = data.get('username', '').strip()
-                email = data.get('email', '').strip()
-                password = data.get('password', '').strip()
-                password2 = data.get('password2', '').strip()
+        try:
+            # Parse the JSON data from request body
+            data = json.loads(request.body)
+            username = data.get('username', '').strip()
+            email = data.get('email', '').strip()
+            password = data.get('password', '').strip()
+            password2 = data.get('password2', '').strip()
 
-                if password != password2:
-                    return JsonResponse({'status': 400, 'messages': 'Passwords do not match.'})
+            if password != password2:
+                return JsonResponse({'status': 400, 'messages': 'Passwords do not match.'})
 
-                # Validate password strength using Django's built-in validators
-                # try:
-                #     if not validate_password(password):
-                #         return JsonResponse({'status': 400, 'messages': 'Password must be at least 8 characters long.'})
-                # except ValidationError as e:
-                #     return JsonResponse({'status': 400, 'messages': str(e.messages)})  
+            # Create user
+            user = User.objects.create_user(username=username, email=email, password=password)
+            user.is_active = False
+            user.save()
 
-                # Create user
-                user = User.objects.create_user(username=username, email=email, password=password)
-                user.is_active = False
-                user.save()
+            # Sending activation email
+            current_site = get_current_site(request)
+            uid = urlsafe_base64_encode(force_bytes(user.id))
+            token = account_activation_token.make_token(user)
+            activation_url = f"http://{current_site.domain}{reverse_lazy('activationview', kwargs={'uidb64': uid, 'token': token})}"
 
-                # Sending activation email
-                current_site = get_current_site(request)
-                uid = urlsafe_base64_encode(force_bytes(user.id))
-                token = account_activation_token.make_token(user)
-                activation_url = f"http://{current_site.domain}{reverse_lazy('activationview', kwargs={'uidb64': uid, 'token': token})}"
+            email_subject = 'Just one more step - Verify your account'
+            message = f"Hello {user.username},\n\nWe're happy you're joining us! Please verify your account using the link below:\n{activation_url}\n\nThanks,\nYour App Team"
 
-                email_subject = 'Just one more step - Verify your account'
-                message = f"Hello {user.username},\n\nWe're happy you're joining us! Please verify your account using the link below:\n{activation_url}\n\nThanks,\nYour App Team"
+            email_message = EmailMessage(email_subject, message, settings.EMAIL_HOST_USER, [email])
+            EmailThread(email_message).start()
+            
+            return JsonResponse({'status': 200, 'messages': 'Your account was registered successfully. Please check your email!'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 400, 'messages': 'Invalid JSON data!'})
 
-                email_message = EmailMessage(email_subject, message, settings.EMAIL_HOST_USER, [email])
-                EmailThread(email_message).start()
-                
-                return JsonResponse({'status': 200, 'messages': 'Your account was registered successfully. Please check your email!'})
-
-            except json.JSONDecodeError:
-                return JsonResponse({'status': 400, 'messages': 'Invalid JSON format!'})
-
-            except Exception as e:
-                return JsonResponse({'status': 400, 'messages': str(e)})
-
-        return render(request, 'account/register.html')
+        except Exception as e:
+            return JsonResponse({'status': 400, 'messages': str(e)})
 
 @method_decorator(never_cache, name='dispatch')
 class SignInView(LogoutRequiredMixin, generic.View):
@@ -189,36 +178,33 @@ class SignInView(LogoutRequiredMixin, generic.View):
         return render(request, 'account/login.html')
 
     def post(self, request):
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
-                username_or_email = data.get('username', '').strip()
-                password = data.get('password', '').strip()
+        try:
+            data = json.loads(request.body)
+            username = data.get('username', '').strip()
+            password = data.get('password', '').strip()
 
-                # Authenticate using Django's built-in method
-                user = authenticate(request, username=username_or_email, password=password)
+            user = authenticate(request, username=username, password=password)
 
-                if user:
-                    if not user.is_active:
-                        return JsonResponse({'status': 403, 'messages': 'Your account is not active!'})
+            if user:
+                if not user.is_active:
+                    return JsonResponse({'status': 403, 'messages': 'Your account is not active!'})
 
-                    login(request, user)
+                login(request, user)
 
-                    if user.is_superuser:
-                        messages.success(request, 'Admin login successful!')
-                        return JsonResponse({'status': 200})
+                if user.is_superuser:
+                    messages.success(request, 'Admin login successful!')
+                    return JsonResponse({'status': 200})
 
-                    messages.success(request, 'User login successful!')
-                    return JsonResponse({'status': 201})
+                messages.success(request, 'User login successful!')
+                return JsonResponse({'status': 201})
 
-                return JsonResponse({'status': 400, 'messages': 'Invalid username/email or password!'})
+            return JsonResponse({'status': 400, 'messages': 'Invalid username/email or password!'})
 
-            except json.JSONDecodeError:
-                return JsonResponse({'status': 400, 'messages': 'Invalid JSON format!'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 400, 'messages': 'Invalid JSON data!'})
 
-            except Exception as e:
-                return JsonResponse({'status': 500, 'messages': f'Something went wrong: {str(e)}'})
-        return render(request, 'account/login.html')
+        except Exception as e:
+            return JsonResponse({'status': 500, 'messages': f'Something went wrong: {str(e)}'})
 
 @method_decorator(never_cache, name='dispatch')    
 class SignOutView(LoginRequiredMixin, generic.View):
@@ -234,60 +220,55 @@ class ChangesPasswordView(LoginRequiredMixin, generic.View):
         return render(request, 'account/changes-password.html')
 
     def post(self, request):
-        if request.user.is_authenticated:
-            if request.method == "POST":
-                try:
-                    data = json.loads(request.body)
-                    current_password = data.get('current_password', '').strip()
-                    password = data.get('password', '').strip()
-                    password2 = data.get('password2', '').strip()
-                    
-                    if password != password2:
-                        return JsonResponse({'status': 400, 'messages': 'Passwords do not match.'})
+        try:
+            data = json.loads(request.body)
+            current_password = data.get('current_password', '').strip()
+            password = data.get('password', '').strip()
+            password2 = data.get('password2', '').strip()
 
-                    # Validate password strength using Django's built-in validators
-                    # try:
-                    #     if not validate_password(password):
-                    #         return JsonResponse({'status': 400, 'messages': 'Password must be at least 8 characters long.'})
-                    # except ValidationError as e:
-                    #     return JsonResponse({'status': 400, 'messages': str(e.messages)})  
+            if password != password2:
+                return JsonResponse({'status': 400, 'messages': 'Passwords do not match.'})
 
-                    # Retrieve user
-                    user = get_object_or_404(User, id=request.user.id)
-                    # Check current password
-                    check_current_password = user.check_password(current_password)
-                    if check_current_password == True:
-                        # Change password and update session
-                        user.set_password(password)
-                        user.save()
-                        # Keeps the user logged in after password change
-                        update_session_auth_hash(request, user)  
-                        # messages.success(request, 'Your password changes successfully !')
-                        return JsonResponse({'status': 200, 'messages': 'Your password changes successfully !'})
-                    else:
-                        # messages.error(request, 'Your current password is incorrect!')
-                        return JsonResponse({'status': 400, 'messages': 'Your current password is incorrect!'})
-                except json.JSONDecodeError:
-                    return JsonResponse({'status': 400, 'messages': 'Invalid JSON format!'})
+            # Validate password strength using Django's built-in validators
+            # try:
+                #     if not validate_password(password):
+                #         return JsonResponse({'status': 400, 'messages': 'Password must be at least 8 characters long.'})
+                # except ValidationError as e:
+                #     return JsonResponse({'status': 400, 'messages': str(e.messages)})  
 
-                except Exception as e:
-                    return JsonResponse({'status': 400, 'messages': f'Something went wrong: {str(e)}'})
-        else:
-            return JsonResponse({'status': 400, 'messages': 'You are not logged in!'})
+            # Retrieve user
+            user = get_object_or_404(User, id=request.user.id)
+            # Check current password
+            check_current_password = user.check_password(current_password)
+            if check_current_password == True:
+                # Change password and update session
+                user.set_password(password)
+                user.save()
+                # Keeps the user logged in after password change
+                update_session_auth_hash(request, user)  
+                # messages.success(request, 'Your password changes successfully !')
+                return JsonResponse({'status': 200, 'messages': 'Your password changes successfully !'})
+            else:
+                    # messages.error(request, 'Your current password is incorrect!')
+                    return JsonResponse({'status': 400, 'messages': 'Your current password is incorrect!'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 400, 'messages': 'Invalid JSON data!'})
+
+        except Exception as e:
+            return JsonResponse({'status': 400, 'messages': str(e)})
         return render(request, 'account/changes-password.html')
   
 @method_decorator(never_cache, name='dispatch')    
 class SendOTPView(LogoutRequiredMixin, generic.View):
     def post(self, request):
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
-                email = data.get('email')
-                if validate_email(email):
-                    user = get_object_or_404(User, email=email)
-                    otp = random.randint(100000, 999999)
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            if validate_email(email):
+                user = get_object_or_404(User, email=email)
+                otp = random.randint(100000, 999999)
 
-                    # Store OTP with expiry in cache
+                # Store OTP with expiry in cache
                 cache.set(f'otp_{email}', otp, timeout=OTP_EXPIRATION_TIME)
 
                 email_subject = 'Reset Your Password'
@@ -308,10 +289,8 @@ class SendOTPView(LogoutRequiredMixin, generic.View):
                     "email": user.email,
                     "otp": otp  # Return the OTP in the response
                 })
-
-            except Exception as e:
-                return JsonResponse({"status": 400, "messages": f"Error: {str(e)}"})
-        return JsonResponse({"status": 400, "messages": "Invalid request!"})
+        except Exception as e:
+            return JsonResponse({"status": 400, "messages": f"Error: {str(e)}"})
 
 @method_decorator(never_cache, name='dispatch')    
 class ResetPasswordView(LogoutRequiredMixin, generic.View):
@@ -319,39 +298,32 @@ class ResetPasswordView(LogoutRequiredMixin, generic.View):
         return render(request, 'account/reset-password.html')
     
     def post(self, request):
-        if request.method == "POST":
-            try:
-                data = json.loads(request.body)
-                print(data)
-                email = data.get('email')
-                otp = data.get('otp')
-                password = data.get('password')
-                print(otp)
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            otp = data.get('otp')
+            password = data.get('password')
+            # Retrieve OTP from cache
+            cached_otp = cache.get(f'otp_{email}')
+            if cached_otp is None:
+                return JsonResponse({'status': 400, 'messages': 'OTP expired or invalid!'})
 
-                # Retrieve OTP from cache
-                cached_otp = cache.get(f'otp_{email}')
-                print("cached_otp: ", cached_otp)
+            if str(otp) != str(cached_otp):
+                return JsonResponse({'status': 400, 'messages': 'Invalid OTP!'})
 
-                if cached_otp is None:
-                    return JsonResponse({'status': 400, 'messages': 'OTP expired or invalid!'})
+            user = get_object_or_404(User, email=email)
+            user.set_password(password)
+            user.save()
 
-                if str(otp) != str(cached_otp):
-                    print("str(otp): ", str(otp), "str(cached_otp): ", str(cached_otp))
-                    return JsonResponse({'status': 400, 'messages': 'Invalid OTP!'})
+            # Remove OTP from cache after successful reset
+            cache.delete(f'otp_{email}')
 
-                user = get_object_or_404(User, email=email)
-                user.set_password(password)
-                user.save()
+            return JsonResponse({'status': 200, 'messages': 'Your password has been reset successfully!'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 400, 'messages': 'Invalid JSON data!'})
 
-                # Remove OTP from cache after successful reset
-                cache.delete(f'otp_{email}')
-
-                return JsonResponse({'status': 200, 'messages': 'Your password has been reset successfully!'})
-
-            except Exception as e:
-                return JsonResponse({'status': 400, 'messages': f"Error: {str(e)}"})
-
-            return JsonResponse({"status": 400, "messages": "Invalid request!"})
+        except Exception as e:
+            return JsonResponse({'status': 400, 'messages': f"Error: {str(e)}"})
         
 @method_decorator(never_cache, name='dispatch')    
 class ProfileView(LoginRequiredMixin, generic.View):
@@ -360,32 +332,34 @@ class ProfileView(LoginRequiredMixin, generic.View):
         
         return render(request, 'account/profile.html')
     def post(self, request):
-        if request.user.is_authenticated:
-            if request.method == "POST":
-                username = request.POST.get("username")
-                email = request.POST.get("email")
-                country = request.POST.get("country")
-                city = request.POST.get("city")
-                home_city = request.POST.get("home_city")
-                zip_code = request.POST.get("zip_code")
-                phone = request.POST.get("phone")
-                address = request.POST.get("address")
-                user = get_object_or_404(User, id=request.user.id)
-                user.username = username
-                user.email = email
-                user.save()
-                user_p = get_object_or_404(Profile, user=request.user.id)
-                user_p.country = country
-                user_p.city = city
-                user_p.home_city = home_city
-                user_p.zip_code = zip_code
-                user_p.phone = phone
-                user_p.address = address
-                if "profile_image" in request.FILES:
-                    profile_image = request.FILES.get("profile_image")
-                    user_p.profile_image = profile_image
-                user_p.save()
-                return JsonResponse({"status": 200, 'messages': 'Your profile updated successfully!'})
-        else:
-            return JsonResponse({"status": 400, 'messages': 'Your are not authenticated'})
-        return render(request, 'account/profile.html')
+        try:
+            data = json.loads(request.body)
+            username = data.get("username")
+            email = data.get("email")
+            country = data.get("country")
+            city = data.get("city")
+            home_city = data.get("home_city")
+            zip_code = data.get("zip_code")
+            phone = data.get("phone")
+            address = data.get("address")
+            user = get_object_or_404(User, id=request.user.id)
+            user.username = username
+            user.email = email
+            user.save()
+            user_p = get_object_or_404(Profile, user=request.user)
+            user_p.country = country
+            user_p.city = city
+            user_p.home_city = home_city
+            user_p.zip_code = zip_code
+            user_p.phone = phone
+            user_p.address = address
+            if "image" in request.FILES:
+                image = request.FILES.get("image")
+                user_p.image = image
+            user_p.save()
+            return JsonResponse({"status": 200, 'messages': 'Your profile updated successfully!'})
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 400, 'messages': 'Invalid JSON data!'})
+
+        except Exception as e:
+            return JsonResponse({'status': 400, 'messages': f"Error: {str(e)}"})
