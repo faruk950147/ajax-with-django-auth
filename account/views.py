@@ -19,7 +19,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from validate_email import validate_email
 from account.mixins import LogoutRequiredMixin
-from account.utils import account_activation_token, EmailThread, send_activation_email
+from account.utils import account_activation_token, EmailThread, ActivationEmailSender
 from account.forms import SignUpForm, SignInForm, ChangePasswordForm, ResetPasswordForm, ResetPasswordConfirmForm
 from account.models import Profile
 from django.contrib.auth.password_validation import validate_password
@@ -154,7 +154,7 @@ class SignUpView(LogoutRequiredMixin, generic.View):
             user.save()
 
             # Sending activation email
-            send_activation_email(user, request, email)
+            ActivationEmailSender(user, request, email).send()
             
             return JsonResponse({'status': 200, 'messages': 'Your account was registered successfully. Please check your email!'})
         except json.JSONDecodeError:

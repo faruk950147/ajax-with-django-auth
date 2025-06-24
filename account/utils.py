@@ -12,24 +12,36 @@ class AppTokenGenerator(PasswordResetTokenGenerator):
         return (text_type(user.is_active) + text_type(user.id) + text_type(timestamp))
 account_activation_token = AppTokenGenerator()
 
-
 class EmailThread(threading.Thread):
     def __init__(self, email):
-        self.email = email
         threading.Thread.__init__(self)
+        self.email = email
+
     def run(self):
         self.email.send(fail_silently=False)
 
-def send_activation_email(user, request, email):
-    current_site = get_current_site(request)
-    uid = urlsafe_base64_encode(force_bytes(user.id))
-    token = account_activation_token.make_token(user)
-    scheme = 'https' if request.is_secure() else 'http'
+class ActivationEmailSender:
+    def __init__(self, user, request, email):
+        self.user = user
+        self.request = request
+        self.email = email
 
-    activation_url = f"{scheme}://{current_site.domain}{reverse_lazy('activationview', kwargs={'uidb64': uid, 'token': token})}"
+    def build_activation_url(self):
+        current_site = get_current_site(self.request)
+        uid = urlsafe_base64_encode(force_bytes(self.user.id))
+        token = account_activation_token.make_token(self.user)
+        scheme = 'https' if self.request.is_secure() else 'http'
+        return f"{scheme}://{current_site.domain}{reverse_lazy('activationview', kwargs={'uidb64': uid, 'token': token})}"
 
-    email_subject = 'Just one more step - Verify your account'
-    message = f"Hello {user.username},\n\nWe're happy you're joining us! Please verify your account:\n{activation_url}\n\nThanks,\nYour App Team"
+    def send(self):
+        subject = 'Just one more step - Verify your account'
+        activation_url = self.build_activation_url()
+        message = (
+            f"Hello {self.user.username},\n\n"
+            f"We're happy you're joining us! Please verify your account:\n"
+            f"{activation_url}\n\nThanks,\nYour App Team"
+        )
 
-    email_message = EmailMessage(email_subject, message, settings.EMAIL_HOST_USER, [email])
-    EmailThread(email_message).start()
+        email_message = EmailMessage(subject, message, settings.EMAIL_HOST_USER, [self.email])
+        EmailThread(email_message).start()
+
